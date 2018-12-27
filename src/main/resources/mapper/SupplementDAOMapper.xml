@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.SignInsystem.dao.SupplementDAO">
+
+    <!--List<Supplement> getAllSupplementByIsPass(@Param("isPass") int isPass);-->
+    <select id="getAllSupplementByIsPass" resultType="com.example.SignInsystem.entity.Supplement">
+        SELECT
+        sup_id supId,
+        user_id userId,
+        apply_excuse applyExcuse,
+        apply_time applyTime,
+        is_pass isPass,
+        apply_date applyDate
+        FROM
+        Supplement
+        WHERE
+        is_pass = #{isPass}
+    </select>
+
+    <!--List<Supplement> getSomeOneSupple(@Param("userId") String userId);-->
+    <select id="getSomeOneSupple" resultType="com.example.SignInsystem.entity.Supplement">
+        SELECT
+        sup_id supId,
+        user_id userId,
+        apply_excuse applyExcuse,
+        apply_time applyTime,
+        is_pass isPass,
+        apply_date applyDate
+        FROM
+        Supplement
+        WHERE
+        user_id = #{userId}
+    </select>
+
+    <!--int insertOneSupple(Supplement supplement);-->
+    <insert id="insertOneSupple" parameterType="com.example.SignInsystem.entity.Supplement">
+        INSERT INTO
+        Supplement
+        (sup_id,user_id,apply_excuse,apply_time,is_pass,apply_date)
+        VALUE
+        (#{supId},#{userId},#{applyExcuse},#{applyTime},#{isPass},#{applyDate})
+    </insert>
+
+    <!--int updateOneSupple(@Param("supId") String supId, @Param("isPass") int isPass);-->
+    <update id="updateOneSupple">
+        UPDATE
+        Supplement
+        SET
+        is_pass = #{isPass}
+        WHERE
+        sup_id = #{supId}
+    </update>
+
+    <!--Supplement getOne(@Param("supId") String supId);-->
+    <select id="getOne" resultType="com.example.SignInsystem.entity.Supplement">
+        SELECT
+        sup_id supId,
+        user_id userId,
+        apply_excuse applyExcuse,
+        apply_time applyTime,
+        is_pass isPass,
+        apply_date applyDate
+        FROM
+        Supplement
+        WHERE
+        sup_id = #{supId}
+    </select>
+
+</mapper>

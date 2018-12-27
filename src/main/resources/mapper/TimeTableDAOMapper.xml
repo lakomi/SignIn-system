@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.SignInsystem.dao.TimeTableDAO">
+
+    <!--String getNewTableMinTime(@Param("userId") String userId);-->
+    <select id="getNewTableMinTime" resultType="java.lang.String">
+        SELECT
+        min(time_date)
+        FROM
+        timeTable;
+    </select>
+
+    <!--String getOldTableMaxTime(@Param("userId") String userId);-->
+    <select id="getOldTableMaxTime" resultType="java.lang.String">
+        SELECT
+        max(time_date)
+        FROM
+        agoTimeTable;
+    </select>
+
+    <!--List<TimeTable> getTablesByDate(@Param("startDate") String startDate,@Param("endDate")String endDate,@Param("userId") String userId);-->
+    <select id="getTablesByDate" resultType="com.example.SignInsystem.entity.TimeTable">
+        SELECT
+        time_id timeId,
+        user_id userId,
+        time_date timeDate,
+        time_in timeIn,
+        time_out timeOut,
+        time_state timeState,
+        time_valid timeValid
+        FROM
+        timeTable
+        WHERE
+        user_id=#{userId} AND time_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY time_date ASC ,time_in ASC
+    </select>
+
+    <!--List<TimeTable> getAgoTableByDate(@Param("startDate") String startDate,@Param("endDate")String endDate,@Param("userId") String userId);-->
+    <select id="getAgoTableByDate" resultType="com.example.SignInsystem.entity.TimeTable">
+        SELECT
+        time_id timeId,
+        user_id userId,
+        time_date timeDate,
+        time_in timeIn,
+        time_out timeOut,
+        time_state timeState,
+        time_valid timeValid
+        FROM
+        agoTimeTable
+        WHERE
+        user_id=#{userId} AND time_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY time_date ASC ,time_in ASC
+    </select>
+
+    <!--int addTimeTable(@Param("timeId") String timeId,@Param("userId") String userId, @Param("timeDate") Date timeDate, @Param("timeIn") Time timeIn, @Param("timeState") int timeState);-->
+    <insert id="addTimeTable">
+        INSERT INTO
+        timeTable
+        (time_id,user_id,time_date,time_in,time_state)
+        VALUE
+        (#{timeId},#{userId},#{timeDate},#{timeIn},#{timeState})
+    </insert>
+
+    <!--int updateTimeTable(@Param("timeId") String timeId,@Param("timeOut") String timeOut,@Param("timeState") int timeState,@Param("timeValid") String timeValid);-->
+    <update id="updateTimeTable">
+        UPDATE
+        timeTable
+        SET
+        time_out=#{timeOut},time_state=#{timeState},time_valid=#{timeValid}
+        WHERE
+        time_id=#{timeId}
+    </update>
+
+    <!--TimeTable getTableByTimeId(String timeId);-->
+    <select id="getTableByTimeId" resultType="com.example.SignInsystem.entity.TimeTable">
+        SELECT
+        time_id timeId,
+        user_id userId,
+        time_date timeDate,
+        time_in timeIn,
+        time_out timeOut,
+        time_state timeState,
+        time_valid timeValid
+        FROM
+        timeTable
+        WHERE
+        time_id=#{timeId}
+    </select>
+
+    <!--List<SignListVo> getSignListByDate(@Param("tempDate") String tempDate);-->
+    <select id="getSignListByDate" resultType="com.example.SignInsystem.vo.SignListVo">
+        SELECT
+	    u.user_id userId,
+	    u.user_name userName,
+	    t.time_id timeId,
+	    t.time_state timeState
+        FROM userInfo u
+        LEFT JOIN
+        timeTable t
+        ON (t.user_id=u.user_id AND t.time_date=#{tempDate} AND t.time_state=1)
+    </select>
+
+    <!--int timerUpdate();-->
+    <update id="timerUpdate">
+        UPDATE
+        timeTable
+        SET
+        time_state=0,time_valid="N"
+        WHERE
+        time_out IS NULL
+    </update>
+
+    <!--List<TimeTable> isRepeat(@Param("userId")String userId,@Param("tempDate") String tempDate);-->
+    <select id="isRepeat" resultType="com.example.SignInsystem.entity.TimeTable">
+        SELECT
+        time_id timeId,
+        user_id userId,
+        time_date timeDate,
+        time_in timeIn,
+        time_out timeOut,
+        time_state timeState,
+        time_valid timeValid
+        FROM
+        timeTable
+        WHERE
+        user_id=#{userId} AND time_date=#{tempDate} AND time_state="1"
+    </select>
+
+    <!--int insertListToAgoTable(@Param("timeTableList") List<TimeTable> timeTableList);-->
+    <insert id="insertListToAgoTable" parameterType="java.util.List">
+        INSERT INTO
+        agoTimeTable
+        (time_id,user_id,time_date,time_in,time_out,time_state,time_valid)
+        values
+        <foreach collection="timeTableList" item="timeTable" separator=",">
+            (#{timeTable.timeId},#{timeTable.userId},#{timeTable.timeDate},#{timeTable.timeIn},#{timeTable.timeOut},#{timeTable.timeState},#{timeTable.timeValid})
+        </foreach>
+    </insert>
+
+    <!--List<TimeTable> selectAll(@Param("startDate") String startDate,@Param("endDate") String endDate);-->
+    <select id="selectAll" resultType="com.example.SignInsystem.entity.TimeTable">
+        SELECT
+        time_id timeId,
+        user_id userId,
+        time_date timeDate,
+        time_in timeIn,
+        time_out timeOut,
+        time_state timeState,
+        time_valid timeValid
+        FROM
+        timeTable
+        WHERE
+        time_date BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <!--int deleteAll(@Param("startDate") String startDate,@Param("endDate") String endDate);-->
+    <delete id="deleteAll">
+        DELETE FROM
+        timeTable
+        where
+        time_date BETWEEN #{startDate} AND #{endDate}
+    </delete>
+
+    <!--int deleteOneDayAgo(@Param("tempDate") String tempDate);-->
+    <delete id="deleteOneDayAgo">
+        DELETE FROM
+        agoTimeTable
+        WHERE
+        datediff(curdate(),time_date)>35
+    </delete>
+
+    <!--int insertOneTimeSup(TimeTable timeTable);-->
+    <insert id="insertOneTimeSup">
+        INSERT INTO
+        timeTable
+        (time_id,user_id,time_date,time_in,time_out,time_state,time_valid)
+        VALUES
+        (#{timeId},#{userId},#{timeDate},#{timeIn},#{timeOut},#{timeState},#{timeValid})
+    </insert>
+
+</mapper>
